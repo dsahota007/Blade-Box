@@ -2,7 +2,10 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
+<<<<<<< HEAD
 .utmp/
+=======
+>>>>>>> 855d6c41860202e1b7d0fd9825902c34863a4473
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -60,7 +63,10 @@ sysinfo.txt
 *.apk
 *.aab
 *.unitypackage
+<<<<<<< HEAD
 *.unitypackage.meta
+=======
+>>>>>>> 855d6c41860202e1b7d0fd9825902c34863a4473
 *.app
 
 # Crashlytics generated file
