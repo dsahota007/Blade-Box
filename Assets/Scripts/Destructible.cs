@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class Destructible : MonoBehaviour
 {
@@ -7,45 +8,43 @@ public class Destructible : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        // Break only once when hit by an object tagged "Blade"
         if (!hasBroken && collision.gameObject.CompareTag("Blade"))
         {
             hasBroken = true;
 
-            // Spawn the broken debris
             GameObject debris = Instantiate(destroyedVersion, transform.position, transform.rotation);
 
-            // Destroy all child objects and components after 1 second
-            StartCoroutine(DestroyCompletely(debris, 1f));
+            // **Ensure ALL debris is destroyed**
+            StartCoroutine(DestroyDebris(debris, 1f));
 
-            // Destroy the original crate immediately
             Destroy(gameObject);
         }
     }
 
-    private System.Collections.IEnumerator DestroyCompletely(GameObject obj, float delay)
+    private IEnumerator DestroyDebris(GameObject debris, float delay)
     {
         yield return new WaitForSeconds(delay);
 
-        if (obj != null)
+        if (debris != null)
         {
-            // Destroy all child objects
-            foreach (Transform child in obj.transform)
+            Debug.Log("Destroying debris: " + debris.name); // Debugging
+
+            foreach (Transform child in debris.transform)
             {
                 Destroy(child.gameObject);
             }
+            Destroy(debris);
+        }
 
-            // Destroy any remaining components
-            foreach (Component comp in obj.GetComponents<Component>())
+        // **Extra Cleanup: Find & Destroy ALL Crate Debris in the Scene**
+        GameObject[] allDebris = GameObject.FindObjectsOfType<GameObject>();
+        foreach (GameObject obj in allDebris)
+        {
+            if (obj.name.Contains("Debris") || obj.name.Contains("Crate"))
             {
-                if (!(comp is Transform)) // Keep the Transform to destroy the GameObject last
-                {
-                    Destroy(comp);
-                }
+                Debug.Log("Force Destroying: " + obj.name); // Debugging
+                Destroy(obj);
             }
-
-            // Finally, destroy the object itself
-            Destroy(obj);
         }
     }
 }
