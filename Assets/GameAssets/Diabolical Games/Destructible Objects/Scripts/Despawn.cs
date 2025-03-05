@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Made by Rajendra Abhinaya, 2023
+
 namespace DiabolicalGames
 {
     public class Despawn : MonoBehaviour
@@ -15,8 +17,6 @@ namespace DiabolicalGames
         private float volumeVariation;
         private float pitchVariation;
         private AudioSource audioSource;
-
-        private bool hasBeenHit = false; // Prevents breaking until Blade hits
 
         public void SetVariables(int despawnPercentage, float despawnTime, float distanceFromPlayer, GameObject player, AudioClip clip, float volume, float volumeVariation, float pitchVariation)
         {
@@ -32,75 +32,51 @@ namespace DiabolicalGames
 
         void Start()
         {
+            // Play sound on debris spawn
             audioSource = GetComponent<AudioSource>();
-            if (audioSource != null && clip != null)
-            {
-                audioSource.pitch = 1f + Random.Range(-pitchVariation / 2, pitchVariation / 2);
-                audioSource.PlayOneShot(clip, volume + Random.Range(-volumeVariation, volumeVariation));
-            }
-
-            // Make sure the debris doesn't move until hit
-            FreezeDebris();
+            audioSource.pitch = 1f + Random.Range(-pitchVariation / 2, pitchVariation / 2);
+            audioSource.PlayOneShot(clip, volume + Random.Range(-volumeVariation, volumeVariation));
         }
 
-        // Freezes all debris so it doesn’t break on spawn
-        private void FreezeDebris()
+        public void BeginCoroutine(string coroutine)
         {
-            foreach (Transform child in transform)
+            switch (coroutine)
             {
-                Rigidbody rb = child.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    rb.isKinematic = true; // Prevents movement
-                    rb.useGravity = false; // Stops falling
-                }
+                case "Timed":
+                    StartCoroutine(DespawnCoroutine());
+                    break;
+                case "Distance from Player":
+                    StartCoroutine(CheckDistance());
+                    break;
             }
         }
 
-        // Unfreezes debris, allowing them to collapse
-        private void UnfreezeDebris()
-        {
-            foreach (Transform child in transform)
-            {
-                Rigidbody rb = child.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    rb.isKinematic = false; // Enable physics
-                    rb.useGravity = true;
-                }
-            }
-        }
-
-        // ✅ Now it only despawns debris when hit by Blade
         public void DespawnDebris()
         {
-            if (!hasBeenHit) return; // Only break if hit
-
             int despawnCount = transform.childCount * despawnPercentage / 100;
             for (int i = transform.childCount - 1; i >= transform.childCount - despawnCount; i--)
             {
-                if (i >= 0)
-                {
-                    Destroy(transform.GetChild(i).gameObject);
-                }
+                Destroy(transform.GetChild(i).gameObject);
             }
         }
 
-        // 💥 Only break when hit by the Blade
-        private void OnCollisionEnter(Collision collision)
+        public IEnumerator CheckDistance()
         {
-            if (!hasBeenHit && collision.gameObject.CompareTag("Blade"))
+            yield return new WaitForSeconds(5f);
+            while (true)
             {
-                hasBeenHit = true;
-                UnfreezeDebris(); // Enable physics when hit by Blade
-                StartCoroutine(DelayedDespawn()); // Add a delay before fully despawning
+                if (Vector3.Distance(transform.position, player.transform.position) > distanceFromPlayer)
+                {
+                    DespawnDebris();
+                    yield break;
+                }
+                yield return new WaitForSeconds(0.5f);
             }
         }
 
-        // 📌 Adds a slight delay before debris disappears
-        private IEnumerator DelayedDespawn()
+        public IEnumerator DespawnCoroutine()
         {
-            yield return new WaitForSeconds(3f); // Adjust as needed
+            yield return new WaitForSeconds(despawnTime);
             DespawnDebris();
         }
     }
