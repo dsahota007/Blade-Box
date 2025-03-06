@@ -24,22 +24,8 @@ namespace DiabolicalGames
             rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         }
 
-        void FixedUpdate()
-        {
-            // Apply movement via Rigidbody to respect physics collision
-            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, 5f); // Keep moving forward
-        }
-
         void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.CompareTag("Wall"))
-            {
-                Debug.Log("Cube hit a wall! Normal collision applied.");
-
-                // Stop sideways movement without overriding normal physics
-                rb.velocity = new Vector3(0, rb.velocity.y, rb.velocity.z);
-            }
-
             if (collision.gameObject.CompareTag("Crate"))
             {
                 Debug.Log("Player hit a crate! Hiding mesh and spawning debris.");
@@ -58,6 +44,15 @@ namespace DiabolicalGames
                     debris.transform.localScale = transform.localScale;
                     Debug.Log("Spawned prefab: " + prefabToSpawn.name);
                 }
+
+                // **Trigger the Death Screen using GameManager**
+                if (GameManager.instance != null)
+                {
+                    GameManager.instance.ShowDeathScreen();
+                }
+
+                // Optionally disable the player object
+                gameObject.SetActive(false);
             }
         }
     }
