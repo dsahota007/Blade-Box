@@ -5,35 +5,59 @@ public class CubeRunner : MonoBehaviour
     public float forwardSpeed = 5f;  // Speed of forward movement
     public float dragSpeed = 10f;    // Speed of left/right movement
 
-    private Vector3 touchStartPos;   // Stores initial touch/mouse position
-    private Vector3 cubeStartPos;    // Stores initial cube position
-    private bool isDragging = false; // Track if player is dragging
+    private Vector3 touchStartPos;
+    private Vector3 cubeStartPos;
+    private bool isDragging = false;
+    private Rigidbody rb;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            rb = gameObject.AddComponent<Rigidbody>();
+        }
+
+        // Proper Rigidbody settings for smooth physics
+        rb.useGravity = false;
+        rb.isKinematic = false;
+        rb.freezeRotation = true;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+    }
+
+    void FixedUpdate()
+    {
+        // Always move forward smoothly
+        rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, forwardSpeed);
+
+        // Handle dragging movement
+        if (isDragging)
+        {
+            Vector3 touchDelta = Input.mousePosition - touchStartPos;
+            float moveX = touchDelta.x / Screen.width * dragSpeed;
+
+            // Move left/right while keeping forward motion
+            rb.velocity = new Vector3(moveX, rb.velocity.y, forwardSpeed);
+        }
+        else
+        {
+            // Ensure it goes straight when you release touch
+            rb.velocity = new Vector3(0, rb.velocity.y, forwardSpeed);
+        }
+    }
 
     void Update()
     {
-        // Move forward automatically
-        transform.Translate(Vector3.forward * forwardSpeed * Time.deltaTime);
-
-        // Handle player input (dragging left/right)
+        // Start dragging
         if (Input.GetMouseButtonDown(0))
         {
             isDragging = true;
             touchStartPos = Input.mousePosition;
-            cubeStartPos = transform.position;
-        }
-        else if (Input.GetMouseButton(0) && isDragging)
-        {
-            Vector3 touchDelta = Input.mousePosition - touchStartPos;
-            float moveX = touchDelta.x / Screen.width * dragSpeed; // Normalize movement
-
-            // Move only left or right, keeping Y and Z the same
-            Vector3 newPosition = new Vector3(cubeStartPos.x + moveX, transform.position.y, transform.position.z);
-
-            transform.position = newPosition;
+            cubeStartPos = rb.position;
         }
         else if (Input.GetMouseButtonUp(0))
         {
-            isDragging = false;
+            isDragging = false; // Stop dragging
         }
     }
 }

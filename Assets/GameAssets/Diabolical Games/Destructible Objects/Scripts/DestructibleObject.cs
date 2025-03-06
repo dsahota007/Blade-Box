@@ -26,10 +26,6 @@ namespace DiabolicalGames
         {
             rigidbody = GetComponent<Rigidbody>();
             rigidbody.isKinematic = true;
-
-            int debrisIndex = debrisAmount == DebrisAmount.Random ? Random.Range(0, debrisPrefabs.Count) : (int)debrisAmount;
-            debris = Instantiate(debrisPrefabs[debrisIndex].prefab, transform.position, Quaternion.identity);
-            debris.SetActive(false);
         }
 
         void OnCollisionEnter(Collision collision)
@@ -44,8 +40,9 @@ namespace DiabolicalGames
         {
             rigidbody.isKinematic = false;
 
-            debris.transform.position = transform.position;
-            debris.transform.rotation = transform.rotation;
+            // **Spawn High Debris**
+            int debrisIndex = debrisAmount == DebrisAmount.Random ? Random.Range(0, debrisPrefabs.Count) : (int)debrisAmount;
+            debris = Instantiate(debrisPrefabs[debrisIndex].prefab, transform.position, Quaternion.identity);
             debris.transform.localScale = transform.localScale;
             debris.SetActive(true);
 
@@ -58,23 +55,25 @@ namespace DiabolicalGames
                 }
             }
 
-            // **Forcefully remove all debris after 1 second**
-            StartCoroutine(ForceRemoveAllDebris(1f));
+            // **Destroy debris prefab after 1 second**
+            StartCoroutine(DestroyDebrisAfterTime(debris, 1f));
 
-            // Destroy the original object immediately
+            // Destroy the original crate immediately
             Destroy(gameObject);
+            ScoreManager.instance.AddScore(Random.Range(5, 17));
+
         }
 
-        private IEnumerator ForceRemoveAllDebris(float delay)
+        private IEnumerator DestroyDebrisAfterTime(GameObject spawnedDebris, float delay)
         {
             yield return new WaitForSeconds(delay);
 
-            if (debris != null)
+            if (spawnedDebris != null)
             {
-                Debug.Log("Destroying debris: " + debris.name);
+                Debug.Log("Destroying spawned debris: " + spawnedDebris.name);
 
-                // **1. Disable rendering & physics**
-                foreach (Transform child in debris.transform)
+                // **1. Disable rendering, physics, and colliders**
+                foreach (Transform child in spawnedDebris.transform)
                 {
                     if (child.TryGetComponent<Renderer>(out Renderer renderer))
                         renderer.enabled = false;
@@ -84,21 +83,25 @@ namespace DiabolicalGames
                         col.enabled = false;
                 }
 
-                // **2. Move debris far away**
-                debris.transform.position = new Vector3(9999, 9999, 9999);
+                // **2. Destroy all child objects**
+                foreach (Transform child in spawnedDebris.transform)
+                {
+                    Destroy(child.gameObject);
+                }
 
-                // **3. Final Hard Removal**
-                DestroyImmediate(debris);
+                // **3. Destroy the debris object itself**
+                Debug.Log("Destroying debris prefab: " + spawnedDebris.name);
+                Destroy(spawnedDebris);
             }
 
-            // **Extra Cleanup: Delete every debris in scene**
-            GameObject[] allDebris = GameObject.FindObjectsOfType<GameObject>();
-            foreach (GameObject obj in allDebris)
+            // **Extra: Remove ALL debris clones to make sure nothing is left**
+            GameObject[] debrisClones = GameObject.FindObjectsOfType<GameObject>();
+            foreach (GameObject obj in debrisClones)
             {
-                if (obj.name.Contains("Debris") || obj.name.Contains("Crate"))
+                if (obj.name.Contains("Crate 1 Debris High(Clone)"))
                 {
-                    Debug.Log("Force Destroying: " + obj.name);
-                    DestroyImmediate(obj);
+                    Debug.Log("Force Destroying clone: " + obj.name);
+                    Destroy(obj);
                 }
             }
         }

@@ -77,7 +77,12 @@ namespace DiabolicalGames
         public IEnumerator DespawnCoroutine()
         {
             yield return new WaitForSeconds(despawnTime);
+
+            // **Disable script before deleting objects**
+            this.enabled = false;
+
             DespawnDebris();
         }
+
     }
 }
