@@ -2,11 +2,9 @@ using UnityEngine;
 
 public class CubeRunner : MonoBehaviour
 {
-    public float forwardSpeed = 5f;  // Speed of forward movement
     public float dragSpeed = 10f;    // Speed of left/right movement
 
     private Vector3 touchStartPos;
-    private Vector3 cubeStartPos;
     private bool isDragging = false;
     private Rigidbody rb;
 
@@ -27,22 +25,18 @@ public class CubeRunner : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Always move forward smoothly
-        rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, forwardSpeed);
-
-        // Handle dragging movement
         if (isDragging)
         {
             Vector3 touchDelta = Input.mousePosition - touchStartPos;
             float moveX = touchDelta.x / Screen.width * dragSpeed;
 
-            // Move left/right while keeping forward motion
-            rb.velocity = new Vector3(moveX, rb.velocity.y, forwardSpeed);
+            // Apply only left/right movement, without affecting the vertical (y-axis) or z-axis
+            rb.velocity = new Vector3(moveX, rb.velocity.y, 0);
         }
         else
         {
-            // Ensure it goes straight when you release touch
-            rb.velocity = new Vector3(0, rb.velocity.y, forwardSpeed);
+            // Ensure it stays in place when not dragging
+            rb.velocity = new Vector3(0, rb.velocity.y, 0);
         }
     }
 
@@ -53,7 +47,6 @@ public class CubeRunner : MonoBehaviour
         {
             isDragging = true;
             touchStartPos = Input.mousePosition;
-            cubeStartPos = rb.position;
         }
         else if (Input.GetMouseButtonUp(0))
         {

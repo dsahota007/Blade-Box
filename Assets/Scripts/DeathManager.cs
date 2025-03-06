@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -36,5 +37,10 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("Death Screen Panel is not assigned in GameManager!");
         }
+    }
+    public void QuitToMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
     }
 }

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6011209670693335173}
   - component: {fileID: 4872715065226981586}
   - component: {fileID: 5262739840743839292}
+  - component: {fileID: -491758336146742977}
   m_Layer: 0
   m_Name: CrateEnemy
   m_TagString: Crate
@@ -155,3 +156,15 @@ MonoBehaviour:
   - name: High
     prefab: {fileID: 1559453058899539972, guid: 79d79c87436d54f4cb387bcf1387b90f, type: 3}
   debrisAmount: 2
+--- !u!114 &-491758336146742977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6721442179849192722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcd2c45666e4560438c6cc76439d012a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

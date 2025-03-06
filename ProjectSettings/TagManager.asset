@@ -7,6 +7,8 @@ TagManager:
   - Blade
   - Crate
   - Wall
+  - Trigger
+  - Destroy
   layers:
   - Default
   - TransparentFX
