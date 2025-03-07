@@ -15,7 +15,7 @@ public class MoveMap : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position += new Vector3(0, 0, -5) * Time.deltaTime;
+        transform.position += new Vector3(0, 0, -7) * Time.deltaTime;
     }
 
     private void OnTriggerEnter(Collider other)
