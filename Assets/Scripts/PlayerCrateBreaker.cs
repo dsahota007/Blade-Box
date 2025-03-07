@@ -48,7 +48,13 @@ namespace DiabolicalGames
                 // **Trigger the Death Screen using GameManager**
                 if (GameManager.instance != null)
                 {
-                    GameManager.instance.ShowDeathScreen();
+                    // ✅ Show Final Score and High Score before death screen
+                    if (ScoreManager.instance != null)
+                    {
+                        ScoreManager.instance.ShowFinalScore(); // Display final score and high score
+                    }
+
+                    GameManager.instance.ShowDeathScreen(); // Activate death screen
                 }
 
                 // Optionally disable the player object
