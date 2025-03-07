@@ -9,6 +9,7 @@ TagManager:
   - Wall
   - Trigger
   - Destroy
+  - DestroyCrate
   layers:
   - Default
   - TransparentFX
