@@ -547,7 +547,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1.76
-  m_Range: 33
+  m_Range: 22
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -1577,7 +1577,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbc47f125602b7c489ab4ecb5c143c4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dragSpeed: 10
+  dragSpeed: 20
 --- !u!114 &855842845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2394,7 +2394,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -43, y: 93}
+  m_AnchoredPosition: {x: -18, y: 93}
   m_SizeDelta: {x: 658.6583, y: 135.7316}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1118056161
