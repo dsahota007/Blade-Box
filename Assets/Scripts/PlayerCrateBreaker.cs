@@ -7,6 +7,9 @@ namespace DiabolicalGames
         [SerializeField] private GameObject prefabToSpawn; // Assign debris prefab in Inspector
         [SerializeField] private GameObject playerMesh;    // Assign the visible player mesh
 
+        [Header("Audio")]
+        [SerializeField] private AudioClip deathSound; // Drag the player death sound in the Inspector
+
         private Rigidbody rb;
 
         void Start()
@@ -28,13 +31,12 @@ namespace DiabolicalGames
         {
             if (collision.gameObject.CompareTag("Crate"))
             {
-                Debug.Log("Player hit a crate! Hiding mesh and spawning debris.");
 
                 // Hide the player's mesh (but keep the player object)
                 if (playerMesh != null)
                 {
                     playerMesh.SetActive(false);
-                    Debug.Log("Player mesh hidden.");
+
                 }
 
                 // Spawn the debris prefab
@@ -42,23 +44,41 @@ namespace DiabolicalGames
                 {
                     GameObject debris = Instantiate(prefabToSpawn, transform.position, Quaternion.identity);
                     debris.transform.localScale = transform.localScale;
-                    Debug.Log("Spawned prefab: " + prefabToSpawn.name);
                 }
 
-                // **Trigger the Death Screen using GameManager**
+                // ✅ Play Death Sound
+                PlayDeathSound();
+
+                // ✅ Show Final Score and High Score before death screen
+                if (ScoreManager.instance != null)
+                {
+                    ScoreManager.instance.ShowFinalScore(); // Display final score and high score
+                }
+
+                // ✅ Trigger the Death Screen using GameManager
                 if (GameManager.instance != null)
                 {
-                    // ✅ Show Final Score and High Score before death screen
-                    if (ScoreManager.instance != null)
-                    {
-                        ScoreManager.instance.ShowFinalScore(); // Display final score and high score
-                    }
-
                     GameManager.instance.ShowDeathScreen(); // Activate death screen
                 }
 
-                // Optionally disable the player object
+                // ✅ Optionally disable the player object
                 gameObject.SetActive(false);
+            }
+        }
+
+        private void PlayDeathSound()
+        {
+            if (deathSound != null)
+            {
+                // **Create a separate object to play the sound**
+                GameObject soundObject = new GameObject("PlayerDeathSound");
+                AudioSource audioSource = soundObject.AddComponent<AudioSource>();
+
+                audioSource.clip = deathSound;
+                audioSource.Play();
+
+                // Destroy the sound object after it finishes playing
+                Destroy(soundObject, audioSource.clip.length);
             }
         }
     }

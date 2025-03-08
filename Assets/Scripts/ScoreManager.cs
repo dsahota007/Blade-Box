@@ -1,20 +1,23 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class ScoreManager : MonoBehaviour
 {
-    public static ScoreManager instance; // Singleton instance
+    public static ScoreManager instance;
 
-    public Text scoreText; // UI Text element for score during the game
-    public Text deathScoreText; // UI Text element for score on death screen
-    public Text highScoreText; // UI Text element for high score on death screen
+    public Text scoreText;
+    public Text deathScoreText;
+    public Text highScoreText;
 
-    private int score = 0; // Current score
-    private int highScore = 0; // High score
+    private int score = 0;
+    private int highScore = 0;
+
+    private int displayedScore = 0;
+    private Coroutine scoreAnimation;
 
     void Awake()
     {
-        // Ensure only one instance exists
         if (instance == null)
         {
             instance = this;
@@ -28,52 +31,105 @@ public class ScoreManager : MonoBehaviour
 
     void Start()
     {
-        // Load high score from PlayerPrefs
         highScore = PlayerPrefs.GetInt("HighScore", 0);
         UpdateScoreText();
     }
 
+    // ✅ Add Score with Smooth Animation and Scale Effect
     public void AddScore(int amount)
     {
-        score += amount; // Increase score
-        UpdateScoreText(); // Update UI
+        score += amount;
+
+        if (scoreAnimation != null)
+            StopCoroutine(scoreAnimation);
+
+        scoreAnimation = StartCoroutine(AnimateScore());
+
+        // Scale effect when score increases
+        StartCoroutine(ScaleTextEffect());
     }
 
+    // ✅ Coroutine to Increment Score Smoothly
+    IEnumerator AnimateScore()
+    {
+        float duration = 0.5f; // Duration of the increment animation
+        float elapsed = 0f;
+
+        int startingScore = displayedScore;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            displayedScore = (int)Mathf.Lerp(startingScore, score, elapsed / duration);
+            UpdateScoreText();
+            yield return null;
+        }
+
+        displayedScore = score;
+        UpdateScoreText();
+    }
+
+    // ✅ Scale Animation (Bounce Effect)
+    IEnumerator ScaleTextEffect()
+    {
+        Vector3 originalScale = scoreText.transform.localScale;
+        Vector3 targetScale = originalScale * 1.1f; // Scale up by 20%
+
+        // Scale up
+        float elapsed = 0f;
+        float duration = 0.1f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            scoreText.transform.localScale = Vector3.Lerp(originalScale, targetScale, elapsed / duration);
+            yield return null;
+        }
+
+        // Scale down
+        elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            scoreText.transform.localScale = Vector3.Lerp(targetScale, originalScale, elapsed / duration);
+            yield return null;
+        }
+    }
+
+    // ✅ Update the Score Text
     void UpdateScoreText()
     {
         if (scoreText != null)
         {
-            scoreText.text = "" + score;
+            scoreText.text = "" + displayedScore;
         }
     }
 
+    // ✅ Show Final Score on Death Screen
     public void ShowFinalScore()
     {
-        // Update death screen score
         if (deathScoreText != null)
         {
             deathScoreText.text = "Score: " + score;
         }
 
-        // Update high score if beaten
         if (score > highScore)
         {
             highScore = score;
             PlayerPrefs.SetInt("HighScore", highScore);
-            PlayerPrefs.Save(); // Save high score
+            PlayerPrefs.Save();
         }
 
-        // Show high score on death screen
         if (highScoreText != null)
         {
             highScoreText.text = "High Score: " + highScore;
         }
     }
 
-    // Optionally reset the score when starting a new game
+    // ✅ Reset the Score
     public void ResetScore()
     {
         score = 0;
+        displayedScore = 0;
         UpdateScoreText();
     }
 }

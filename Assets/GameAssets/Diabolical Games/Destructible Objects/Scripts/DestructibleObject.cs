@@ -19,8 +19,12 @@ namespace DiabolicalGames
         [SerializeField] private List<DebrisPrefab> debrisPrefabs = new List<DebrisPrefab>();
         [SerializeField] private DebrisAmount debrisAmount = new DebrisAmount();
 
+        [Header("Audio")]
+        [SerializeField] private AudioClip[] woodSounds; // Drag your audio clips here
+
         private GameObject debris;
         private Rigidbody rigidbody;
+        private bool isBroken = false; // Prevent multiple triggers
 
         void Start()
         {
@@ -30,8 +34,9 @@ namespace DiabolicalGames
 
         void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.CompareTag("Blade"))
+            if (collision.gameObject.CompareTag("Blade") && !isBroken)
             {
+                isBroken = true;
                 Break();
             }
         }
@@ -55,13 +60,33 @@ namespace DiabolicalGames
                 }
             }
 
+            // **Play Random Sound**
+            PlayRandomSound();
+
             // **Destroy debris prefab after 1 second**
             StartCoroutine(DestroyDebrisAfterTime(debris, 1f));
 
             // Destroy the original crate immediately
             Destroy(gameObject);
             ScoreManager.instance.AddScore(Random.Range(5, 17));
+        }
 
+        private void PlayRandomSound()
+        {
+            if (woodSounds.Length > 0)
+            {
+                int randomIndex = Random.Range(0, woodSounds.Length);
+
+                // **Create a separate object to play the sound**
+                GameObject soundObject = new GameObject("CrateSound");
+                AudioSource audioSource = soundObject.AddComponent<AudioSource>();
+
+                audioSource.clip = woodSounds[randomIndex];
+                audioSource.Play();
+
+                // **Destroy the sound object after clip finishes**
+                Destroy(soundObject, audioSource.clip.length);
+            }
         }
 
         private IEnumerator DestroyDebrisAfterTime(GameObject spawnedDebris, float delay)
@@ -70,9 +95,6 @@ namespace DiabolicalGames
 
             if (spawnedDebris != null)
             {
-                Debug.Log("Destroying spawned debris: " + spawnedDebris.name);
-
-                // **1. Disable rendering, physics, and colliders**
                 foreach (Transform child in spawnedDebris.transform)
                 {
                     if (child.TryGetComponent<Renderer>(out Renderer renderer))
@@ -83,24 +105,20 @@ namespace DiabolicalGames
                         col.enabled = false;
                 }
 
-                // **2. Destroy all child objects**
                 foreach (Transform child in spawnedDebris.transform)
                 {
                     Destroy(child.gameObject);
                 }
 
-                // **3. Destroy the debris object itself**
-                Debug.Log("Destroying debris prefab: " + spawnedDebris.name);
                 Destroy(spawnedDebris);
             }
 
-            // **Extra: Remove ALL debris clones to make sure nothing is left**
+            // **Cleanup remaining debris clones**
             GameObject[] debrisClones = GameObject.FindObjectsOfType<GameObject>();
             foreach (GameObject obj in debrisClones)
             {
                 if (obj.name.Contains("Crate 1 Debris High(Clone)"))
                 {
-                    Debug.Log("Force Destroying clone: " + obj.name);
                     Destroy(obj);
                 }
             }
